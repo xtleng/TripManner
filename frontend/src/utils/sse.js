@@ -1,75 +1,130 @@
-import { useUserStore } from '@/stores/user'
-
 /**
- * Create an SSE connection to the given URL.
- * @param {string} url - The SSE endpoint URL
- * @param {object} handlers - { onMessage, onError, onOpen }
- * @returns {{ close: Function }} controller to close the connection
- */
-export function createSSEConnection(url, handlers = {}) {
-  const userStore = useUserStore()
-  const fullUrl = url.startsWith('/api') ? url : `/api${url}`
-  const separator = fullUrl.includes('?') ? '&' : '?'
-  const urlWithToken = userStore.token
-    ? `${fullUrl}${separator}token=${encodeURIComponent(userStore.token)}`
-    : fullUrl
-
-  const eventSource = new EventSource(urlWithToken)
-
-  eventSource.onopen = () => {
-    if (handlers.onOpen) handlers.onOpen()
-  }
-
-  eventSource.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data)
-      if (handlers.onMessage) handlers.onMessage(data)
-    } catch {
-      if (handlers.onMessage) handlers.onMessage(event.data)
-    }
-  }
-
-  eventSource.onerror = (error) => {
-    if (handlers.onError) handlers.onError(error)
-    eventSource.close()
-  }
-
-  return {
-    close: () => eventSource.close(),
-  }
-}
-
-/**
- * Simulate an SSE stream from a mock route object for local development.
- * @param {object} mockRoute - The mock route data
- * @param {object} handlers - { onMessage, onError, onOpen }
- * @returns {{ close: Function }} controller to stop the simulation
+ * Simulate SSE stream from mock route data.
+ * Fires events with realistic timing: thinking -> route_text chunks -> poi_added -> intent_data -> done
  */
 export function simulateSSEStream(mockRoute, handlers = {}) {
   let cancelled = false
-  const steps = mockRoute.steps || []
+  const controller = { close: () => { cancelled = true } }
 
-  if (handlers.onOpen) handlers.onOpen()
+  ;(async () => {
+    const fire = (event, data) => {
+      if (cancelled) return false
+      if (handlers[event]) handlers[event](data)
+      return true
+    }
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms))
 
-  let index = 0
-  const interval = setInterval(() => {
-    if (cancelled || index >= steps.length) {
-      clearInterval(interval)
-      if (!cancelled && handlers.onMessage) {
-        handlers.onMessage({ type: 'done' })
+    // 1. Thinking
+    if (!fire('thinking', { status: 'planning', text: '正在为您规划路线...', algorithm: mockRoute.algorithm_type })) return
+    await sleep(800)
+
+    // 2. Route intro text
+    const city = mockRoute.city
+    const introText = `为您规划了${city}旅行路线！共${mockRoute.route_result.route.length}个景点。\n\n`
+    // Send intro in chunks (simulate typewriter)
+    for (let i = 0; i < introText.length; i += 3) {
+      if (cancelled) return
+      fire('route_text', { delta: introText.slice(i, i + 3) })
+      await sleep(30)
+    }
+    await sleep(300)
+
+    // 3. For each POI: send poi_added + route_text description
+    for (const poi of mockRoute.route_result.route) {
+      if (cancelled) return
+
+      // Add POI to map
+      fire('poi_added', { poi })
+      await sleep(400)
+
+      // Send text description in chunks
+      const desc = `**第${poi.visit_order}站：${poi.name}**\n${poi.category} · 建议停留${poi.recommended_duration_min}分钟\n\n`
+      for (let i = 0; i < desc.length; i += 4) {
+        if (cancelled) return
+        fire('route_text', { delta: desc.slice(i, i + 4) })
+        await sleep(25)
       }
-      return
+      await sleep(300 + Math.random() * 500) // 300-800ms between POIs
     }
-    if (handlers.onMessage) {
-      handlers.onMessage({ type: 'stream_text', data: steps[index] })
-    }
-    index++
-  }, 100)
 
-  return {
-    close: () => {
-      cancelled = true
-      clearInterval(interval)
-    },
-  }
+    // 4. Intent data (only for algorithm routes)
+    if (mockRoute.intent_data) {
+      await sleep(300)
+      fire('intent_data', mockRoute.intent_data)
+      await sleep(200)
+
+      // Describe intent in text
+      let intentText = ''
+      if (mockRoute.intent_data.travel_mode) {
+        const mode = mockRoute.intent_data.travel_mode
+        const conf = Math.round(mockRoute.intent_data.travel_mode_confidence * 100)
+        const modeLabels = { approaching: '接近模式', moving_away: '远离模式', u_turn: 'U型模式', irregular: '不规则模式' }
+        intentText = `\n系统识别到您的出行意图为【${modeLabels[mode] || mode}】，置信度：${conf}%`
+      } else if (mockRoute.intent_data.preference_factors) {
+        const eta = Math.round(mockRoute.intent_data.blend_weight_eta * 100)
+        intentText = `\n路线中${eta}%基于您的个人偏好，${100 - eta}%参考了当地热门趋势`
+      }
+      for (let i = 0; i < intentText.length; i += 4) {
+        if (cancelled) return
+        fire('route_text', { delta: intentText.slice(i, i + 4) })
+        await sleep(25)
+      }
+    }
+
+    // 5. Done
+    await sleep(200)
+    fire('done', { plan_id: Date.now(), algorithm: mockRoute.algorithm_type, is_mock: true })
+  })()
+
+  return controller
+}
+
+/**
+ * Create real SSE connection (for Phase 2 backend integration)
+ */
+export function createSSEConnection(url, body, handlers = {}) {
+  // Use fetch + ReadableStream to support POST with body for SSE
+  const abortController = new AbortController()
+
+  ;(async () => {
+    try {
+      const token = localStorage.getItem('token') || ''
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(body),
+        signal: abortController.signal,
+      })
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+        // Parse SSE events from buffer
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
+        let currentEvent = ''
+        for (const line of lines) {
+          if (line.startsWith('event: ')) {
+            currentEvent = line.slice(7).trim()
+          } else if (line.startsWith('data: ') && currentEvent) {
+            try {
+              const data = JSON.parse(line.slice(6))
+              if (handlers[currentEvent]) handlers[currentEvent](data)
+            } catch {
+              // ignore parse errors
+            }
+            currentEvent = ''
+          }
+        }
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError' && handlers.error) handlers.error(err)
+    }
+  })()
+
+  return { close: () => abortController.abort() }
 }

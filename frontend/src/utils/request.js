@@ -4,7 +4,7 @@ import router from '@/router'
 
 const request = axios.create({
   baseURL: '/api',
-  timeout: 30000,
+  timeout: 5000,
 })
 
 // Request interceptor: attach token

@@ -13,17 +13,27 @@ export const useUserStore = defineStore('user', () => {
   // Actions
   async function login(credentials) {
     const res = await apiLogin(credentials)
-    token.value = res.token || res.access_token || ''
+    token.value = res.token || res.access_token || 'mock-token'
     localStorage.setItem('token', token.value)
-    await fetchProfile()
+    if (res.user) {
+      userInfo.value = res.user
+      localStorage.setItem('userInfo', JSON.stringify(res.user))
+    } else {
+      await fetchProfile()
+    }
     return res
   }
 
   async function register(data) {
     const res = await apiRegister(data)
-    token.value = res.token || res.access_token || ''
+    token.value = res.token || res.access_token || 'mock-token'
     localStorage.setItem('token', token.value)
-    await fetchProfile()
+    if (res.user) {
+      userInfo.value = res.user
+      localStorage.setItem('userInfo', JSON.stringify(res.user))
+    } else {
+      await fetchProfile()
+    }
     return res
   }
 
