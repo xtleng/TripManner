@@ -6,7 +6,7 @@ import { computed } from 'vue'
 
 const userStore = useUserStore()
 const route = useRoute()
-const showNavBar = computed(() => userStore.isLoggedIn && !['login', 'register'].includes(route.name))
+const showNavBar = computed(() => userStore.isLoggedIn && !['login', 'register', 'onboarding'].includes(route.name))
 </script>
 
 <template>

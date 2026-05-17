@@ -19,8 +19,6 @@ const algorithmLabel = computed(() => {
   return appStore.currentAlgorithm || ''
 })
 
-const isMock = computed(() => appStore.useMockData)
-
 function handleSend() {
   const text = inputText.value.trim()
   if (!text || props.isStreaming) return
@@ -57,14 +55,8 @@ function handleKeydown(e) {
         class="send-btn"
       />
     </div>
-    <div class="input-status">
-      <div class="status-left">
-        <el-tooltip :content="isMock ? 'Mock mode: using local data' : 'Live mode: connecting to backend'" placement="top">
-          <span class="mode-dot" :class="{ mock: isMock, live: !isMock }"></span>
-        </el-tooltip>
-        <span class="mode-label">{{ isMock ? 'Mock' : 'Live' }}</span>
-      </div>
-      <div v-if="algorithmLabel" class="status-right">
+    <div v-if="algorithmLabel" class="input-status">
+      <div class="status-right">
         <el-tag size="small" type="info" effect="plain">{{ algorithmLabel }}</el-tag>
       </div>
     </div>
@@ -101,37 +93,9 @@ function handleKeydown(e) {
 .input-status {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-top: 6px;
   padding: 0 4px;
-}
-
-.status-left {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.mode-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.mode-dot.mock {
-  background-color: #67C23A;
-  box-shadow: 0 0 4px rgba(103, 194, 58, 0.5);
-}
-
-.mode-dot.live {
-  background-color: #409EFF;
-  box-shadow: 0 0 4px rgba(64, 158, 255, 0.5);
-}
-
-.mode-label {
-  font-size: 11px;
-  color: #909399;
 }
 
 .status-right {

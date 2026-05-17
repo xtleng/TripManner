@@ -48,7 +48,7 @@ const crossCityCities = ['New York', 'Los Angeles', 'San Francisco']
               Mock 模式使用预置的模拟数据，无需连接后端算法服务。适用于前端开发与演示。
             </template>
             <template v-else>
-              Real 模式将连接后端真实算法服务（EKD-Trip / CrossCityLLMCPR / DeepSeek-Agent），需要确保后端服务正常运行。
+              Real 模式将连接后端真实算法服务（EKD-Trip / CrossTrip / DeepSeek-Agent），需要确保后端服务正常运行。
             </template>
           </p>
         </el-card>
@@ -81,7 +81,7 @@ const crossCityCities = ['New York', 'Los Angeles', 'San Francisco']
             <el-divider direction="vertical" class="column-divider" />
 
             <div class="city-column">
-              <h4 class="city-column-title">CrossCityLLMCPR 跨城市</h4>
+              <h4 class="city-column-title">CrossTrip 跨城市</h4>
               <div class="city-tags">
                 <el-tag
                   v-for="city in crossCityCities"

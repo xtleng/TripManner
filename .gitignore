@@ -16,6 +16,7 @@ venv/
 .env
 .env.local
 .env.*.local
+supabase.json
 
 # IDE
 .vscode/
@@ -34,3 +35,14 @@ npm-debug.log*
 
 # Claude
 .claude/
+
+# Screenshots & test artifacts
+*.png
+mock测试用例.txt
+
+# Large model files
+*.xhr
+*.pt
+*.pth
+*.ckpt
+*.bin

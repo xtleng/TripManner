@@ -9,9 +9,37 @@ export const TRAVEL_MODES = {
 export const EKD_TRIP_CITIES = ['Glasgow', 'Osaka', 'Toronto', 'Tokyo']
 export const CROSS_CITY_CITIES = ['New York', 'Los Angeles', 'San Francisco']
 
+// Chinese to English city name mapping
+export const CITY_NAME_MAP = {
+  // EKD-Trip cities
+  '东京': 'Tokyo',
+  '大阪': 'Osaka',
+  '格拉斯哥': 'Glasgow',
+  '多伦多': 'Toronto',
+  // Cross-city cities
+  '纽约': 'New York',
+  '洛杉矶': 'Los Angeles',
+  '旧金山': 'San Francisco',
+  '三藩市': 'San Francisco',
+  // English variants (lowercase)
+  'tokyo': 'Tokyo',
+  'osaka': 'Osaka',
+  'glasgow': 'Glasgow',
+  'toronto': 'Toronto',
+  'new york': 'New York',
+  'los angeles': 'Los Angeles',
+  'san francisco': 'San Francisco',
+  'la': 'Los Angeles',
+  'sf': 'San Francisco',
+  'ny': 'New York',
+}
+
+// DeepSeek-Agent demo cities (not in dataset)
+export const DEEPSEEK_CITIES = ['北京', '上海', '广州', '深圳', '成都', '杭州', '西安', '重庆', '南京', '武汉', '厦门', '青岛', '大连', '苏州', '三亚', '巴黎', '伦敦', '首尔', '曼谷', '新加坡']
+
 export const ALGORITHM_TYPES = {
   EKD_TRIP: 'EKD-Trip',
-  CROSS_CITY: 'CrossCityLLMCPR',
+  CROSS_CITY: 'CrossTrip',
   DEEPSEEK: 'DeepSeek-Agent',
 }
 

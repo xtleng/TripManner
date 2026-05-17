@@ -1,9 +1,11 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useUserStore } from '@/stores/user'
+import { useAppStore } from '@/stores/app'
 import { ElMessage } from 'element-plus'
 
 const userStore = useUserStore()
+const appStore = useAppStore()
 
 const saving = ref(false)
 
@@ -133,6 +135,34 @@ async function handleSave() {
           </el-form-item>
         </el-form>
       </el-card>
+
+      <!-- Developer Section -->
+      <el-card class="settings-section" shadow="hover">
+        <template #header>
+          <span class="section-title">开发者选项</span>
+        </template>
+        <el-form label-width="100px" label-position="top">
+          <el-form-item label="数据模式">
+            <div class="mode-switch-row">
+              <el-switch
+                :model-value="appStore.useMockData"
+                @change="(val) => appStore.setUseMockData(val)"
+                size="large"
+                active-text="Mock"
+                inactive-text="Real"
+                inline-prompt
+                style="--el-switch-on-color: #e6a23c; --el-switch-off-color: #67c23a;"
+              />
+              <span class="mode-status">
+                {{ appStore.useMockData ? 'Mock 数据' : '真实算法' }}
+              </span>
+            </div>
+            <p class="mode-desc">
+              Mock 模式使用预置模拟数据，无需连接后端。切换为 Real 模式需确保后端服务运行。
+            </p>
+          </el-form-item>
+        </el-form>
+      </el-card>
     </div>
   </div>
 </template>
@@ -189,5 +219,25 @@ async function handleSave() {
 
 .profile-info {
   flex: 1;
+}
+
+.mode-switch-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.mode-status {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.mode-desc {
+  font-size: 13px;
+  color: #909399;
+  line-height: 1.6;
+  margin: 0;
 }
 </style>

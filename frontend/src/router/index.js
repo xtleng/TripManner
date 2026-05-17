@@ -15,6 +15,12 @@ const routes = [
     meta: { guest: true },
   },
   {
+    path: '/onboarding',
+    name: 'onboarding',
+    component: () => import('@/views/OnboardingView.vue'),
+    meta: { requiresAuth: true, hideNav: true },
+  },
+  {
     path: '/',
     name: 'home',
     component: () => import('@/views/HomeView.vue'),
@@ -53,6 +59,14 @@ router.beforeEach((to, from, next) => {
     next({ name: 'login', query: { redirect: to.fullPath } })
   } else if (to.meta.guest && userStore.isLoggedIn) {
     next({ name: 'home' })
+  } else if (to.meta.requiresAuth && userStore.isLoggedIn && to.name !== 'onboarding') {
+    // Redirect to onboarding if user hasn't completed it
+    const userInfo = userStore.userInfo
+    if (userInfo && !userInfo.onboarded) {
+      next({ name: 'onboarding' })
+    } else {
+      next()
+    }
   } else {
     next()
   }

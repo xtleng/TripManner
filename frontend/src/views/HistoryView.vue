@@ -26,7 +26,7 @@ const mockRecords = ref([
     id: 2,
     date: '2026-04-25',
     city: 'Los Angeles',
-    algorithm: 'CrossCityLLMCPR',
+    algorithm: 'CrossTrip',
     isMock: true,
     pois: [
       { name: 'Hollywood Sign', duration: '1小时', description: '好莱坞标志' },
@@ -64,7 +64,7 @@ const mockRecords = ref([
     id: 5,
     date: '2026-04-22',
     city: 'San Francisco',
-    algorithm: 'CrossCityLLMCPR',
+    algorithm: 'CrossTrip',
     isMock: true,
     pois: [
       { name: 'Golden Gate Bridge', duration: '1小时', description: '旧金山地标' },

@@ -18,6 +18,8 @@ export const useUserStore = defineStore('user', () => {
     if (res.user) {
       userInfo.value = res.user
       localStorage.setItem('userInfo', JSON.stringify(res.user))
+      // Persist per-user data for mock mode
+      localStorage.setItem('userInfo_' + res.user.username, JSON.stringify(res.user))
     } else {
       await fetchProfile()
     }
@@ -31,6 +33,7 @@ export const useUserStore = defineStore('user', () => {
     if (res.user) {
       userInfo.value = res.user
       localStorage.setItem('userInfo', JSON.stringify(res.user))
+      localStorage.setItem('userInfo_' + res.user.username, JSON.stringify(res.user))
     } else {
       await fetchProfile()
     }
@@ -59,6 +62,7 @@ export const useUserStore = defineStore('user', () => {
     if (userInfo.value) {
       userInfo.value.preferences = prefs
       localStorage.setItem('userInfo', JSON.stringify(userInfo.value))
+      localStorage.setItem('userInfo_' + userInfo.value.username, JSON.stringify(userInfo.value))
     }
     return res
   }

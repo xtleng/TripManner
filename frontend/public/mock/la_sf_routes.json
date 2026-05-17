@@ -2,7 +2,7 @@
   {
     "city": "San Francisco",
     "scenario_name": "洛杉矶用户的旧金山休闲之旅",
-    "algorithm_type": "CrossCityLLMCPR",
+    "algorithm_type": "CrossTrip",
     "query_input": {
       "source_city": "Los Angeles",
       "target_city": "San Francisco",
@@ -85,7 +85,7 @@
   {
     "city": "San Francisco",
     "scenario_name": "洛杉矶用户的旧金山文化探索",
-    "algorithm_type": "CrossCityLLMCPR",
+    "algorithm_type": "CrossTrip",
     "query_input": {
       "source_city": "Los Angeles",
       "target_city": "San Francisco",

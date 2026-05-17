@@ -9,6 +9,11 @@ import IntentPanel from '@/components/intent/IntentPanel.vue'
 
 const chatStore = useChatStore()
 const mapViewRef = ref(null)
+const intentCollapsed = ref(false)
+
+function handleIntentToggle() {
+  intentCollapsed.value = !intentCollapsed.value
+}
 
 // Event handlers
 function handleCreateDialog() {
@@ -131,12 +136,15 @@ onMounted(() => {
         <div
           v-if="chatStore.currentIntentData"
           class="intent-section"
+          :class="{ 'intent-collapsed': intentCollapsed }"
         >
           <IntentPanel
             :algorithm-type="chatStore.currentAlgorithm || ''"
             :intent-data="chatStore.currentIntentData"
             :source-city="chatStore.parsedFields?.departure_city || ''"
             :target-city="chatStore.parsedFields?.destination_city || ''"
+            :collapsed="intentCollapsed"
+            @toggle="handleIntentToggle"
           />
         </div>
       </transition>
@@ -204,10 +212,15 @@ onMounted(() => {
 
 /* Intent Section */
 .intent-section {
-  height: var(--intent-panel-height);
+  height: var(--intent-panel-height, 220px);
   flex-shrink: 0;
   border-top: 1px solid #e4e7ed;
   overflow: hidden;
+  transition: height 0.3s ease;
+}
+
+.intent-section.intent-collapsed {
+  height: 42px;
 }
 
 /* Input Section */

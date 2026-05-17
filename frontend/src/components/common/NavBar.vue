@@ -2,12 +2,10 @@
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { useAppStore } from '@/stores/app'
 
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
-const appStore = useAppStore()
 
 const username = computed(() => {
   if (userStore.userInfo) return userStore.userInfo.nickname || userStore.userInfo.username
@@ -24,8 +22,6 @@ function handleCommand(command) {
   } else if (command === 'logout') {
     userStore.logout()
     router.push('/login')
-  } else if (command === 'toggle-mock') {
-    appStore.toggleMockMode()
   }
 }
 
@@ -65,17 +61,6 @@ function isActive(name) {
     </div>
 
     <div class="nav-right">
-      <el-tag
-        :type="appStore.useMockData ? 'success' : 'primary'"
-        size="small"
-        class="mock-tag"
-        effect="plain"
-        @click="appStore.toggleMockMode()"
-        style="cursor: pointer;"
-      >
-        {{ appStore.useMockData ? 'Mock' : 'Live' }}
-      </el-tag>
-
       <el-dropdown trigger="click" @command="handleCommand">
         <span class="user-dropdown-trigger">
           <el-avatar :size="28" style="background-color: #409EFF;">
@@ -171,10 +156,6 @@ function isActive(name) {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.mock-tag {
-  font-size: 11px;
 }
 
 .user-dropdown-trigger {
